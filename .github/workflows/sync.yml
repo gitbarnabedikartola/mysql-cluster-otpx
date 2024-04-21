@@ -3,8 +3,8 @@ name: Sync
 on:
   workflow_dispatch:
 
-  # push:
-    # branches: [ "*" ]
+  push:
+    branches: [ "*" ]
 
 jobs:
   build:
@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Send Sync
         env:
-          server: ${{ secrets.SERVER_NAME }}
-          token: ${{ secrets.TOKEN_SERVER_NAME }}
+          server: ${{ secrets.SERVER_AWS_XPTO_EKS }}
+          token: ${{ secrets.TOKEN_AWS_XPTO_EKS }}
         shell: bash
         run: |
-          curl -k -X POST https://$server/api/v1/applications/$(echo ${{ github.repository }} | cut -d "/" -f2)/sync -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d '{"revision": "HEAD", "prune": false, "dryRun": false, "strategy": {"hook": {"force": false}}}'
+          curl -k -X POST https://${server}/api/v1/applications/$(echo ${{ github.repository }} | cut -d "/" -f2)/sync -H "Authorization: Bearer ${token}" -H 'Content-Type: application/json' -d '{"revision": "HEAD", "prune": false, "dryRun": false, "strategy": {"hook": {"force": false}}}'
