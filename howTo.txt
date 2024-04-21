@@ -1,0 +1,49 @@
+## Redimencionar limits cd CPU e Ram ##
+1- Edite o valor no deployment.yml apenas para registro.
+2- Edite o StatefulSets/mysql-cluster na lista de resources do mysql ou side car, save & close
+nameSpace=xpto
+cpu=2
+mem=2
+kubectl set resources statefulset mysql-cluster -n $nameSpace --containers="mysql" --limits=cpu=$cpu,memory=${mem}Gi
+3- Esperar o restart dos pods, isso pode levar algum tempo.
+4- Espere terminar sozinho, NÃO tente acelerrar o processo, isso quebra o mysql.
+5- Tenha paciencia.
+
+
+# Redimencionar PV
+1- Edite o valor no deployment.yml apenas para registro.
+2- Edite o valor em PersisVolume
+spec:
+  capacity:
+    storage: $VALOR
+3- save & close
+
+
+## Alterar valores do my.cnf ##
+1- Edite o valor no ConfigMap/mysql-cluster-initiconf > 99-extra.cnf: | > save & close
+2- Remova o finalizer dos pods
+
+nameSpace=xpto
+podList=$(kubectl -n $nameSpace get pods | grep -E mysql-cluster-[0-9] | awk '{print $1}' | sort -r)
+for pod in $podList; do
+  kubectl patch -n $nameSpace pods $pod --type='json' -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+done
+
+3- Reinicie os pods/mysql-cluster-[0-9]
+
+for pod in $podList; do
+  kubectl -n xpto delete pods/$pod
+done
+
+4- Esperar o restart dos pods, isso pode levar algum tempo.
+5- Espere terminar sozinho, NÃO tente acelerrar o processo, isso quebra o mysql.
+6- Tenha paciencia.
+
+
+## Alterar quantida de replicas ##
+1- Edite o arquivo deployment.yml
+2- Aplique o deployment.yml
+3- Espere o(s) novo(s) pods ser(em) criado(s)
+
+
+

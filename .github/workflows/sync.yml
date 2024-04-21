@@ -1,0 +1,20 @@
+name: Sync
+
+on:
+  workflow_dispatch:
+
+  # push:
+    # branches: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send Sync
+        env:
+          server: ${{ secrets.SERVER_NAME }}
+          token: ${{ secrets.TOKEN_SERVER_NAME }}
+        shell: bash
+        run: |
+          curl -k -X POST https://$server/api/v1/applications/$(echo ${{ github.repository }} | cut -d "/" -f2)/sync -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d '{"revision": "HEAD", "prune": false, "dryRun": false, "strategy": {"hook": {"force": false}}}'
